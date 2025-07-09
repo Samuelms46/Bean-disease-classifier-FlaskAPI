@@ -1,0 +1,22 @@
+# Create .gitignore file
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+myenv/
+.env
+
+# Models 
+models/
+
+# Uploads
+static/uploads/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store

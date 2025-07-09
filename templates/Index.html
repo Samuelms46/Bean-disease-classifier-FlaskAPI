@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bean Leaf Classifier</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f5f0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 1024px;
+            padding: 24px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        h1 {
+            font-size: 30px;
+            font-weight: bold;
+            text-align: center;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #4b5563;
+            margin-bottom: 32px;
+            font-size: 16px;
+        }
+        .status {
+            text-align: center;
+            padding: 8px 16px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        .status.connected {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .status.disconnected {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+        .dropzone {
+            border: 2px dashed #4b8a3e;
+            background-color: #e6efe6;
+            padding: 32px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .dropzone.dragover {
+            background-color: #c6e2c0;
+            border-color: #2f6b26;
+        }
+        .dropzone p {
+            color: #4b5563;
+            margin-bottom: 8px;
+        }
+        .dropzone .file-note {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .preview {
+            display: none;
+            margin-bottom: 16px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        @media (min-width: 640px) {
+            .preview {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .preview img {
+            width: 100%;
+            height: 128px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .preview p {
+            font-size: 14px;
+            color: #4b5563;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border: none;
+        }
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+        .model-selection {
+            margin-bottom: 32px;
+        }
+        .model-selection h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+        .model-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+        @media (min-width: 640px) {
+            .model-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .model-card {
+            background-color: #e6efe6;
+            border: 1px solid #4b8a3e;
+            padding: 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .model-card:hover {
+            background-color: #d1f2d1;
+        }
+        .model-card.unavailable {
+            background-color: #f3f4f6;
+            border-color: #d1d5db;
+            opacity: 0.6;
+        }
+        .model-card label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .model-card input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #4b8a3e;
+            border-radius: 4px;
+            margin-right: 8px;
+            cursor: pointer;
+        }
+        .model-card input[type="checkbox"]:checked {
+            background-color: #4b8a3e;
+            background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+        }
+        .model-card input[type="checkbox"]:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        .model-card span {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .model-card p {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+        .btn-primary {
+            background-color: #4b8a3e;
+            color: white;
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background-color: #2f6b26;
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-primary.loading {
+            position: relative;
+        }
+        .btn-primary.loading::after {
+            content: '';
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: translateY(-50%) rotate(360deg); }
+        }
+        .error {
+            color: #dc2626;
+            background-color: #fee2e2;
+            border: 1px solid #fecaca;
+            padding: 12px;
+            border-radius: 4px;
+            text-align: center;
+            margin-top: 16px;
+            display: none;
+        }
+        .loading {
+            text-align: center;
+            margin-top: 16px;
+            color: #4b5563;
+            display: none;
+        }
+        .results {
+            margin-top: 32px;
+            display: none;
+        }
+        .results h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+        .result-card {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+        .result-card img {
+            width: 128px;
+            height: 128px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 16px;
+        }
+        .result-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        .prediction {
+            margin-bottom: 16px;
+            padding: 12px;
+            background-color: #f3f4f6;
+            border-radius: 4px;
+        }
+        .prediction p {
+            color: #4b5563;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        .prediction .model-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .prediction .class {
+            color: #4b8a3e;
+            font-weight: 500;
+        }
+        .prediction .confidence {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        .prediction details {
+            margin-top: 8px;
+        }
+        .prediction summary {
+            cursor: pointer;
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+        .prediction .probabilities {
+            font-size: 12px;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+        @media (min-width: 640px) {
+            .result-card {
+                display: flex;
+                align-items: flex-start;
+            }
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #e5e7eb;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 8px;
+            display: none;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #4b8a3e;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Bean Leaf Classifier</h1>
+        <p class="subtitle">Upload multiple images and classify them using advanced AI models</p>
+        
+        <div id="connectionStatus" class="status disconnected">
+            🔄 Connecting to server...
+        </div>
+
+        <div class="upload-section">
+            <div id="dropzone" class="dropzone">
+                <span style="font-size: 40px;">📤</span>
+                <p>Drop multiple images here or click to browse</p>
+                <p class="file-note">Supports JPG, PNG up to 10MB each</p>
+                <input type="file" id="fileInput" accept=".jpg,.jpeg,.png" multiple>
+            </div>
+
+            <div id="preview" class="preview">
+            </div>
+
+            <div class="button-group">
+                <button id="addMoreBtn" class="btn btn-secondary">+ Add More</button>
+                <button id="clearAllBtn" class="btn btn-secondary">🗑️ Clear All</button>
+            </div>
+        </div>
+
+        <div class="model-selection">
+            <h2>🎯 Select Classification Model</h2>
+            <div id="modelGrid" class="model-grid">
+                <!-- Models will be populated dynamically -->
+            </div>
+        </div>
+
+        <button id="classifyBtn" class="btn-primary" disabled>🔍 Classify All Images</button>
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div id="loading" class="loading">Processing images...</div>
+        <div id="error" class="error"></div>
+
+        <div id="results" class="results">
+            <h2>🎯 Classification Results</h2>
+            <div id="predictions">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://localhost:5000';
+        
+        // DOM elements
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const addMoreBtn = document.getElementById('addMoreBtn');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const classifyBtn = document.getElementById('classifyBtn');
+        const error = document.getElementById('error');
+        const results = document.getElementById('results');
+        const predictions = document.getElementById('predictions');
+        const loading = document.getElementById('loading');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const modelGrid = document.getElementById('modelGrid');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        
+        let files = [];
+        let availableModels = [];
+        let isConnected = false;
+
+        // Initialize the application
+        async function init() {
+            await checkConnection();
+            if (isConnected) {
+                await loadAvailableModels();
+            } else {
+                // Fallback to static models if server is not available
+                loadStaticModels();
+            }
+            setupEventListeners();
+        }
+
+        // Check server connection
+        async function checkConnection() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                const data = await response.json();
+                isConnected = response.ok;
+                
+                if (isConnected) {
+                    connectionStatus.textContent = `✅ Connected to server (${data.models_loaded} models loaded)`;
+                    connectionStatus.className = 'status connected';
+                } else {
+                    throw new Error('Server not responding');
+                }
+            } catch (err) {
+                isConnected = false;
+                connectionStatus.textContent = '❌ Cannot connect to server. Using offline mode.';
+                connectionStatus.className = 'status disconnected';
+            }
+        }
+
+        // Load available models from server
+        async function loadAvailableModels() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/models`);
+                const data = await response.json();
+                availableModels = data.available_models || [];
+                
+                // Create model cards
+                modelGrid.innerHTML = '';
+                const modelInfo = data.model_info || {};
+                
+                ['mobilenet_v2', 'vit', 'resnet18'].forEach(modelName => {
+                    const isAvailable = availableModels.includes(modelName);
+                    const card = document.createElement('div');
+                    card.className = `model-card ${isAvailable ? '' : 'unavailable'}`;
+                    
+                    card.innerHTML = `
+                        <label>
+                            <input type="checkbox" value="${modelName}" class="model-checkbox" 
+                                   ${isAvailable ? 'checked' : 'disabled'}>
+                            <div>
+                                <span>${modelName.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                                <p>${modelInfo[modelName] || getModelDescription(modelName)}</p>
+                                ${!isAvailable ? '<p style="color: #dc2626; font-weight: 500;">Model not available</p>' : ''}
+                            </div>
+                        </label>
+                    `;
+                    
+                    modelGrid.appendChild(card);
+                });
+                
+                // Add event listeners to checkboxes
+                document.querySelectorAll('.model-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', updateClassifyButton);
+                });
+                
+            } catch (err) {
+                console.error('Error loading models:', err);
+                showError('Failed to load available models');
+                loadStaticModels();
+            }
+        }
+
+        // Load static models as fallback
+        function loadStaticModels() {
+            modelGrid.innerHTML = '';
+            
+            ['mobilenet_v2', 'vit', 'resnet18'].forEach(modelName => {
+                const card = document.createElement('div');
+                card.className = 'model-card';
+                
+                card.innerHTML = `
+                    <label>
+                        <input type="checkbox" value="${modelName}" class="model-checkbox" checked>
+                        <div>
+                            <span>${modelName.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                            <p>${getModelDescription(modelName)}</p>
+                        </div>
+                    </label>
+                `;
+                
+                modelGrid.appendChild(card);
+            });
+            
+            // Add event listeners to checkboxes
+            document.querySelectorAll('.model-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', updateClassifyButton);
+            });
+        }
+
+        // Get model description
+        function getModelDescription(modelName) {
+            const descriptions = {
+                'mobilenet_v2': 'A lightweight model for mobile apps',
+                'vit': 'A transformer-based model',
+                'resnet18': 'An ImageNet model for classification'
+            };
+            return descriptions[modelName] || 'Model description';
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            dropzone.addEventListener('dragover', handleDragOver);
+            dropzone.addEventListener('dragleave', handleDragLeave);
+            dropzone.addEventListener('drop', handleDrop);
+            dropzone.addEventListener('click', () => fileInput.click());
+            
+            addMoreBtn.addEventListener('click', () => fileInput.click());
+            clearAllBtn.addEventListener('click', clearAll);
+            fileInput.addEventListener('change', handleFileSelect);
+            classifyBtn.addEventListener('click', classifyImages);
+        }
+
+        // Drag and drop handlers
+        function handleDragOver(e) {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        }
+
+        function handleDragLeave() {
+            dropzone.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        }
+
+        function handleFileSelect() {
+            handleFiles(fileInput.files);
+            fileInput.value = '';
+        }
+
+        function handleFiles(newFiles) {
+            const validFiles = Array.from(newFiles).filter(file => 
+                ['image/jpeg', 'image/png'].includes(file.type) && file.size <= 10 * 1024 * 1024
+            );
+            
+            if (validFiles.length < newFiles.length) {
+                showError('Some files were invalid. Only JPG/PNG up to 10MB are allowed.');
+            }
+            
+            files = [...files, ...validFiles];
+            updatePreview();
+            updateClassifyButton();
+        }
+
+        function updatePreview() {
+            preview.innerHTML = '';
+            if (files.length > 0) {
+                preview.style.display = 'grid';
+                files.forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        const div = document.createElement('div');
+                        div.innerHTML = `
+                            <img src="${reader.result}" alt="Preview ${index + 1}">
+                            <p>${file.name}</p>
+                        `;
+                        preview.appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+
+        function updateClassifyButton() {
+            const filesSelected = files.length > 0;
+            const modelCheckboxes = document.querySelectorAll('.model-checkbox');
+            const modelsSelected = Array.from(modelCheckboxes).some(checkbox => checkbox.checked && !checkbox.disabled);
+            
+            classifyBtn.disabled = !(filesSelected && modelsSelected);
+            
+            if (!modelsSelected) {
+                showError('Please select at least one available model.');
+            } else if (!filesSelected) {
+                showError('Please upload at least one image.');
+            } else {
+                hideError();
+            }
+        }
+
+        function clearAll() {
+            files = [];
+            preview.innerHTML = '';
+            preview.style.display = 'none';
+            results.style.display = 'none';
+            hideError();
+            updateClassifyButton();
+        }
+
+        function showError(message) {
+            error.textContent = message;
+            error.style.display = 'block';
+            results.style.display = 'none';
+        }
+
+        function hideError() {
+            error.style.display = 'none';
+        }
+
+        function updateProgress(current, total) {
+            const percentage = (current / total) * 100;
+            progressFill.style.width = `${percentage}%`;
+        }
+
+        async function classifyImages() {
+            if (classifyBtn.disabled) return;
+            
+            classifyBtn.disabled = true;
+            classifyBtn.classList.add('loading');
+            hideError();
+            results.style.display = 'none';
+            loading.style.display = 'block';
+            progressBar.style.display = 'block';
+            
+            const selectedModels = Array.from(document.querySelectorAll('.model-checkbox'))
+                .filter(checkbox => checkbox.checked && !checkbox.disabled)
+                .map(checkbox => checkbox.value);
+
+            try {
+                const allResults = [];
+                
+                // Process each file individually
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    updateProgress(i, files.length);
+                    
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('models', selectedModels.join(','));
+
+                    const response = await fetch(`${API_BASE_URL}/predict`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Failed to get predictions.');
+                    }
+
+                    allResults.push({
+                        filename: file.name,
+                        predictions: data.predictions,
+                        fileIndex: i
+                    });
+                }
+
+                updateProgress(files.length, files.length);
+                displayResults(allResults);
+
+            } catch (err) {
+                showError('Error connecting to the server: ' + err.message);
+            } finally {
+                classifyBtn.classList.remove('loading');
+                loading.style.display = 'none';
+                progressBar.style.display = 'none';
+                classifyBtn.disabled = false;
+            }
+        }
+
+        function displayResults(allResults) {
+            predictions.innerHTML = '';
+            
+            allResults.forEach(result => {
+                const file = files[result.fileIndex];
+                const reader = new FileReader();
+                
+                reader.onload = () => {
+                    const resultCard = document.createElement('div');
+                    resultCard.className = 'result-card';
+                    
+                    let predictionsHtml = '';
+                    Object.entries(result.predictions).forEach(([model, pred]) => {
+                        const maxProb = Math.max(...pred.probabilities);
+                        const confidence = (maxProb * 100).toFixed(1);
+                        
+                        // Format probabilities for display
+                        const probsText = pred.probabilities
+                            .map((prob, i) => {
+                                const classes = ['angular_leaf_spot', 'bean_rust', 'healthy'];
+                                return `${classes[i].replace('_', ' ')}: ${(prob * 100).toFixed(2)}%`;
+                            })
+                            .join(', ');
+                        
+                        predictionsHtml += `
+                            <div class="prediction">
+                                <p class="model-name">${model.replace('_', ' ').toUpperCase()}</p>
+                                <p>Predicted Class: <span class="class">${pred.class.replace('_', ' ')}</span></p>
+                                <p class="confidence">Confidence: ${confidence}%</p>
+                                <details>
+                                    <summary>View all probabilities</summary>
+                                    <div class="probabilities">${probsText}</div>
+                                </details>
+                            </div>
+                        `;
+                    });
+                    
+                    resultCard.innerHTML = `
+                        <img src="${reader.result}" alt="${result.filename}">
+                        <div>
+                            <h3>Image: ${result.filename}</h3>
+                            ${predictionsHtml}
+                        </div>
+                    `;
+                    
+                    predictions.appendChild(resultCard);
+                };
+                reader.readAsDataURL(file);
+            });
+            
+            results.style.display = 'block';
+        }
+
+        // Initialize the application when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
