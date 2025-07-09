@@ -90,13 +90,6 @@
                 grid-template-columns: repeat(3, 1fr);
             }
         }
-        .preview-item {
-            position: relative;
-            background-color: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 8px;
-        }
         .preview img {
             width: 100%;
             height: 128px;
@@ -109,23 +102,6 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            margin-top: 4px;
-        }
-        .remove-btn {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            background: rgba(220, 38, 38, 0.9);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        .remove-btn:hover {
-            background: rgba(220, 38, 38, 1);
         }
         .button-group {
             display: flex;
@@ -194,6 +170,8 @@
             margin-right: 8px;
             cursor: pointer;
         }
+
+        
         .model-card input[type="checkbox"]:checked {
             background-color: #4b8a3e;
             background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
@@ -268,11 +246,57 @@
             margin-top: 32px;
             display: none;
         }
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
         .results h2 {
             font-size: 20px;
             font-weight: 600;
             color: #1f2937;
-            margin-bottom: 16px;
+        }
+        .download-section {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .btn-download {
+            background-color: #059669;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-download:hover {
+            background-color: #047857;
+        }
+        .btn-download:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .format-select {
+            padding: 6px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #374151;
+            background-color: white;
+        }
+        .download-status {
+            font-size: 12px;
+            color: #059669;
+            margin-left: 8px;
         }
         .result-card {
             background-color: #f9fafb;
@@ -356,6 +380,37 @@
             transition: width 0.3s ease;
             width: 0%;
         }
+        .summary-stats {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+        .summary-stats h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 12px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4b8a3e;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body>
@@ -400,15 +455,51 @@
         <div id="error" class="error"></div>
 
         <div id="results" class="results">
-            <h2>🎯 Classification Results</h2>
+            <div class="results-header">
+                <h2>🎯 Classification Results</h2>
+                <div class="download-section">
+                    <select id="formatSelect" class="format-select">
+                        <option value="json">JSON</option>
+                        <option value="csv">CSV</option>
+                        <option value="txt">Text Report</option>
+                    </select>
+                    <button id="downloadBtn" class="btn-download">
+                        📥 Download Results
+                    </button>
+                    <span id="downloadStatus" class="download-status"></span>
+                </div>
+            </div>
+            
+            <div id="summaryStats" class="summary-stats">
+                <h3>📊 Summary Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalImages">0</div>
+                        <div class="stat-label">Total Images</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="modelsUsed">0</div>
+                        <div class="stat-label">Models Used</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="avgConfidence">0%</div>
+                        <div class="stat-label">Avg Confidence</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="healthyCount">0</div>
+                        <div class="stat-label">Healthy Leaves</div>
+                    </div>
+                </div>
+            </div>
+            
             <div id="predictions">
             </div>
         </div>
     </div>
 
     <script>
-        // Configuration - Use relative URL since we're serving from the same server
-        const API_BASE_URL = '';
+        // Configuration
+        const API_BASE_URL = 'http://localhost:5000';
         
         // DOM elements
         const dropzone = document.getElementById('dropzone');
@@ -425,10 +516,15 @@
         const modelGrid = document.getElementById('modelGrid');
         const progressBar = document.getElementById('progressBar');
         const progressFill = document.getElementById('progressFill');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const formatSelect = document.getElementById('formatSelect');
+        const downloadStatus = document.getElementById('downloadStatus');
+        const summaryStats = document.getElementById('summaryStats');
         
         let files = [];
         let availableModels = [];
         let isConnected = false;
+        let classificationResults = []; // Store results for download
 
         // Initialize the application
         async function init() {
@@ -457,7 +553,7 @@
                 }
             } catch (err) {
                 isConnected = false;
-                connectionStatus.textContent = '❌ Cannot connect to server. Using offline mode.';
+                connectionStatus.textContent = '❌ Cannot connect to server. Using demo mode.';
                 connectionStatus.className = 'status disconnected';
             }
         }
@@ -553,6 +649,7 @@
             clearAllBtn.addEventListener('click', clearAll);
             fileInput.addEventListener('change', handleFileSelect);
             classifyBtn.addEventListener('click', classifyImages);
+            downloadBtn.addEventListener('click', downloadResults);
         }
 
         // Drag and drop handlers
@@ -596,15 +693,13 @@
                 preview.style.display = 'grid';
                 files.forEach((file, index) => {
                     const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const previewItem = document.createElement('div');
-                        previewItem.className = 'preview-item';
-                        previewItem.innerHTML = `
-                            <button class="remove-btn" onclick="removeFile(${index})">×</button>
-                            <img src="${e.target.result}" alt="Preview">
+                    reader.onload = () => {
+                        const div = document.createElement('div');
+                        div.innerHTML = `
+                            <img src="${reader.result}" alt="Preview ${index + 1}">
                             <p>${file.name}</p>
                         `;
-                        preview.appendChild(previewItem);
+                        preview.appendChild(div);
                     };
                     reader.readAsDataURL(file);
                 });
@@ -613,182 +708,322 @@
             }
         }
 
-        function removeFile(index) {
-            files.splice(index, 1);
-            updatePreview();
-            updateClassifyButton();
+        function updateClassifyButton() {
+            const filesSelected = files.length > 0;
+            const modelCheckboxes = document.querySelectorAll('.model-checkbox');
+            const modelsSelected = Array.from(modelCheckboxes).some(checkbox => checkbox.checked && !checkbox.disabled);
+            
+            classifyBtn.disabled = !(filesSelected && modelsSelected);
+            
+            if (!modelsSelected) {
+                showError('Please select at least one available model.');
+            } else if (!filesSelected) {
+                showError('Please upload at least one image.');
+            } else {
+                hideError();
+            }
         }
 
         function clearAll() {
             files = [];
-            updatePreview();
+            classificationResults = [];
+            preview.innerHTML = '';
+            preview.style.display = 'none';
+            results.style.display = 'none';
+            downloadStatus.textContent = '';
+            hideError();
             updateClassifyButton();
-            hideError();
-            hideResults();
-        }
-
-        function updateClassifyButton() {
-            const selectedModels = getSelectedModels();
-            const hasFiles = files.length > 0;
-            const hasModels = selectedModels.length > 0;
-            
-            classifyBtn.disabled = !hasFiles || !hasModels || !isConnected;
-            
-            if (!hasFiles) {
-                classifyBtn.textContent = '🔍 Upload images to classify';
-            } else if (!hasModels) {
-                classifyBtn.textContent = '🔍 Select at least one model';
-            } else if (!isConnected) {
-                classifyBtn.textContent = '🔍 Server not connected';
-            } else {
-                classifyBtn.textContent = `🔍 Classify ${files.length} image${files.length > 1 ? 's' : ''} with ${selectedModels.length} model${selectedModels.length > 1 ? 's' : ''}`;
-            }
-        }
-
-        function getSelectedModels() {
-            return Array.from(document.querySelectorAll('.model-checkbox:checked'))
-                .map(checkbox => checkbox.value);
-        }
-
-        async function classifyImages() {
-            if (!files.length || !isConnected) return;
-
-            const selectedModels = getSelectedModels();
-            if (!selectedModels.length) {
-                showError('Please select at least one model');
-                return;
-            }
-
-            // Show loading state
-            showLoading();
-            hideError();
-            hideResults();
-            classifyBtn.classList.add('loading');
-            classifyBtn.disabled = true;
-            progressBar.style.display = 'block';
-
-            try {
-                const results = [];
-                
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    const progress = ((i + 1) / files.length) * 100;
-                    progressFill.style.width = `${progress}%`;
-                    
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    formData.append('models', selectedModels.join(','));
-                    
-                    const response = await fetch(`${API_BASE_URL}/predict`, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || 'Classification failed');
-                    }
-                    
-                    const data = await response.json();
-                    
-                    // Create image URL for preview
-                    const imageUrl = URL.createObjectURL(file);
-                    
-                    results.push({
-                        filename: data.filename,
-                        predictions: data.predictions,
-                        imageUrl: imageUrl,
-                        file: file
-                    });
-                }
-                
-                displayResults(results);
-                
-            } catch (err) {
-                console.error('Classification error:', err);
-                showError(`Classification failed: ${err.message}`);
-            } finally {
-                hideLoading();
-                classifyBtn.classList.remove('loading');
-                classifyBtn.disabled = false;
-                progressBar.style.display = 'none';
-                progressFill.style.width = '0%';
-                updateClassifyButton();
-            }
-        }
-
-        function displayResults(results) {
-            predictions.innerHTML = '';
-            
-            results.forEach(result => {
-                const resultCard = document.createElement('div');
-                resultCard.className = 'result-card';
-                
-                let predictionsHtml = '';
-                Object.entries(result.predictions).forEach(([modelName, predData]) => {
-                    if (predData.error) {
-                        predictionsHtml += `
-                            <div class="prediction">
-                                <p><span class="model-name">${modelName.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span></p>
-                                <p style="color: #dc2626;">Error: ${predData.error}</p>
-                            </div>
-                        `;
-                    } else {
-                        const probabilities = predData.probabilities.map((prob, idx) => 
-                            `${['Angular Leaf Spot', 'Bean Rust', 'Healthy'][idx]}: ${(prob * 100).toFixed(1)}%`
-                        ).join('<br>');
-                        
-                        predictionsHtml += `
-                            <div class="prediction">
-                                <p><span class="model-name">${modelName.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span></p>
-                                <p>Prediction: <span class="class">${predData.class.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span></p>
-                                <p class="confidence">Confidence: ${(predData.confidence * 100).toFixed(2)}%</p>
-                                <details>
-                                    <summary>Show all probabilities</summary>
-                                    <div class="probabilities">${probabilities}</div>
-                                </details>
-                            </div>
-                        `;
-                    }
-                });
-                
-                resultCard.innerHTML = `
-                    <img src="${result.imageUrl}" alt="Classified image">
-                    <div>
-                        <h3>${result.filename}</h3>
-                        ${predictionsHtml}
-                    </div>
-                `;
-                
-                predictions.appendChild(resultCard);
-            });
-            
-            results.style.display = 'block';
         }
 
         function showError(message) {
             error.textContent = message;
             error.style.display = 'block';
+            results.style.display = 'none';
         }
 
         function hideError() {
             error.style.display = 'none';
         }
 
-        function showLoading() {
-            loading.style.display = 'block';
+        function updateProgress(current, total) {
+            const percentage = (current / total) * 100;
+            progressFill.style.width = `${percentage}%`;
         }
 
-        function hideLoading() {
-            loading.style.display = 'none';
-        }
-
-        function hideResults() {
+        async function classifyImages() {
+            if (classifyBtn.disabled) return;
+            
+            classifyBtn.disabled = true;
+            classifyBtn.classList.add('loading');
+            hideError();
             results.style.display = 'none';
+            loading.style.display = 'block';
+            progressBar.style.display = 'block';
+            downloadStatus.textContent = '';
+            
+            const selectedModels = Array.from(document.querySelectorAll('.model-checkbox'))
+                .filter(checkbox => checkbox.checked && !checkbox.disabled)
+                .map(checkbox => checkbox.value);
+
+            try {
+                const allResults = [];
+                
+                if (isConnected) {
+                    // Process each file individually with real API
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        updateProgress(i, files.length);
+                        
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('models', selectedModels.join(','));
+
+                        const response = await fetch(`${API_BASE_URL}/predict`, {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const data = await response.json();
+                        
+                        if (!response.ok) {
+                            throw new Error(data.error || 'Failed to get predictions.');
+                        }
+
+                        allResults.push({
+                            filename: file.name,
+                            predictions: data.predictions,
+                            fileIndex: i
+                        });
+                    }
+                } else {
+                    // Demo mode - generate fake results
+                    const classes = ['angular_leaf_spot', 'bean_rust', 'healthy'];
+                    
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        updateProgress(i, files.length);
+                        
+                        // Simulate network delay
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                        
+                        const predictions = {};
+                        selectedModels.forEach(model => {
+                            const probs = [Math.random(), Math.random(), Math.random()];
+                            const sum = probs.reduce((a, b) => a + b, 0);
+                            const normalizedProbs = probs.map(p => p / sum);
+                            const maxIndex = normalizedProbs.indexOf(Math.max(...normalizedProbs));
+                            
+                            predictions[model] = {
+                                class: classes[maxIndex],
+                                probabilities: normalizedProbs
+                            };
+                        });
+                        
+                        allResults.push({
+                            filename: file.name,
+                            predictions: predictions,
+                            fileIndex: i
+                        });
+                    }
+                }
+
+                updateProgress(files.length, files.length);
+                classificationResults = allResults; // Store for download
+                displayResults(allResults);
+                updateSummaryStats(allResults);
+
+            } catch (err) {
+                showError('Error processing images: ' + err.message);
+            } finally {
+                classifyBtn.classList.remove('loading');
+                loading.style.display = 'none';
+                progressBar.style.display = 'none';
+                classifyBtn.disabled = false;
+            }
         }
 
-        // Initialize the app when DOM is loaded
-        document.addEventListener('DOMContentLoaded', init);
+        function updateSummaryStats(results) {
+            const totalImages = results.length;
+            const modelsUsed = getUsedModels().length;
+            
+            // Calculate average confidence
+            let totalConfidence = 0;
+            let predictionCount = 0;
+            let healthyCount = 0;
+            
+            results.forEach(result => {
+                Object.values(result.predictions).forEach(pred => {
+                    const confidence = Math.max(...pred.probabilities);
+                    totalConfidence += confidence;
+                    predictionCount++;
+                    
+                    if (pred.class === 'healthy') {
+                        healthyCount++;
+                    }
+                });
+            });
+            
+            const avgConfidence = predictionCount > 0 ? (totalConfidence / predictionCount * 100).toFixed(1) : 0;
+            
+            document.getElementById('totalImages').textContent = totalImages;
+            document.getElementById('modelsUsed').textContent = modelsUsed;
+            document.getElementById('avgConfidence').textContent = avgConfidence + '%';
+            document.getElementById('healthyCount').textContent = healthyCount;
+        }
+
+        function displayResults(allResults) {
+            predictions.innerHTML = '';
+            
+            allResults.forEach(result => {
+                const file = files[result.fileIndex];
+                const reader = new FileReader();
+                
+                reader.onload = () => {
+                    const resultCard = document.createElement('div');
+                    resultCard.className = 'result-card';
+                    
+                    let predictionsHtml = '';
+                    Object.entries(result.predictions).forEach(([model, pred]) => {
+                        const maxProb = Math.max(...pred.probabilities);
+                        const confidence = (maxProb * 100).toFixed(1);
+                        
+                        const classLabels = ['angular_leaf_spot', 'bean_rust', 'healthy'];
+                        const probabilitiesHtml = classLabels.map((label, index) => 
+                            `${label}: ${(pred.probabilities[index] * 100).toFixed(1)}%`
+                        ).join('<br>');
+
+                        predictionsHtml += `
+                            <div class="prediction">
+                                <p><span class="model-name">${model.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span> predicted <span class="class">${pred.class}</span></p>
+                                <p class="confidence">Confidence: ${confidence}%</p>
+                                <details>
+                                    <summary>View probabilities</summary>
+                                    <div class="probabilities">${probabilitiesHtml}</div>
+                                </details>
+                            </div>
+                        `;
+                    });
+
+                    resultCard.innerHTML = `
+                        <img src="${reader.result}" alt="${result.filename}">
+                        <div>
+                            <h3>${result.filename}</h3>
+                            ${predictionsHtml}
+                        </div>
+                    `;
+                    
+                    predictions.appendChild(resultCard);
+                };
+                
+                reader.readAsDataURL(file);
+            });
+            
+            results.style.display = 'block';
+        }
+
+        // Get used models for summary stats
+        function getUsedModels() {
+            return Array.from(document.querySelectorAll('.model-checkbox'))
+                .filter(checkbox => checkbox.checked && !checkbox.disabled)
+                .map(checkbox => checkbox.value);
+        }
+
+        // Download results in selected format
+        function downloadResults() {
+            if (classificationResults.length === 0) {
+                showError('No results to download.');
+                return;
+            }
+
+            const format = formatSelect.value;
+            let content;
+            let filename;
+            let mimeType;
+
+            switch (format) {
+                case 'json':
+                    content = JSON.stringify(classificationResults, null, 2);
+                    filename = 'classification_results.json';
+                    mimeType = 'application/json';
+                    break;
+                case 'csv':
+                    content = generateCSV();
+                    filename = 'classification_results.csv';
+                    mimeType = 'text/csv';
+                    break;
+                case 'txt':
+                    content = generateTextReport();
+                    filename = 'classification_results.txt';
+                    mimeType = 'text/plain';
+                    break;
+            }
+
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            downloadStatus.textContent = `Downloaded as ${format.toUpperCase()}`;
+            setTimeout(() => downloadStatus.textContent = '', 3000);
+        }
+
+        // Generate CSV content
+        function generateCSV() {
+            const headers = ['Filename', 'Model', 'Predicted Class', 'Confidence', 'Angular Leaf Spot Prob', 'Bean Rust Prob', 'Healthy Prob'];
+            const rows = [];
+            
+            classificationResults.forEach(result => {
+                Object.entries(result.predictions).forEach(([model, pred]) => {
+                    const maxProb = Math.max(...pred.probabilities);
+                    const confidence = (maxProb * 100).toFixed(1);
+                    const probs = pred.probabilities.map(p => (p * 100).toFixed(1));
+                    rows.push([
+                        `"${result.filename}"`,
+                        model,
+                        pred.class,
+                        confidence,
+                        ...probs
+                    ].join(','));
+                });
+            });
+
+            return [headers.join(','), ...rows].join('\n');
+        }
+
+        // Generate text report
+        function generateTextReport() {
+            let report = 'Bean Leaf Classification Results\n';
+            report += '==============================\n\n';
+            
+            classificationResults.forEach((result, index) => {
+                report += `Image ${index + 1}: ${result.filename}\n`;
+                report += '-------------------------\n';
+                
+                Object.entries(result.predictions).forEach(([model, pred]) => {
+                    const maxProb = Math.max(...pred.probabilities);
+                    const confidence = (maxProb * 100).toFixed(1);
+                    report += `${model.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}:\n`;
+                    report += `  Predicted: ${pred.class}\n`;
+                    report += `  Confidence: ${confidence}%\n`;
+                    report += '  Probabilities:\n';
+                    ['angular_leaf_spot', 'bean_rust', 'healthy'].forEach((label, i) => {
+                        report += `    ${label}: ${(pred.probabilities[i] * 100).toFixed(1)}%\n`;
+                    });
+                    report += '\n';
+                });
+                report += '\n';
+            });
+
+            return report;
+        }
+
+        // Initialize the application
+        init();
     </script>
 </body>
 </html>

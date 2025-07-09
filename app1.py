@@ -249,10 +249,10 @@ def index():
     
     return render_template('index.html', results=None, choice=None)
 
-# @app.route('/frontend')
-# def frontend():
-#     """Serve the new frontend interface"""
-#     return render_template('frontend.html')
+@app.route('/frontend')
+def frontend():
+    """Serve the new frontend interface"""
+    return render_template('frontend.html')
 
 # ----------------------------------------------------------------------
 # Error Handlers
