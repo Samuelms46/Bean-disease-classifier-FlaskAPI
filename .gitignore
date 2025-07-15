@@ -8,9 +8,6 @@ env/
 myenv/
 .env
 
-# Models 
-models/
-
 # Uploads
 static/uploads/
 

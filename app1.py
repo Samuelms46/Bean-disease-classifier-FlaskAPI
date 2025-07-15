@@ -75,7 +75,7 @@ def load_mobilenet():
     try:
         model = models.mobilenet_v2()
         model.classifier[1] = nn.Linear(model.classifier[1].in_features, 3)
-        model_path = MODEL_DIR / "best_model.pt"
+        model_path = MODEL_DIR / "mobilenetv2_normalized_weights.pt"
         if model_path.exists():
             sd = torch.load(model_path, map_location=DEVICE)
             model.load_state_dict(sd, strict=False)
