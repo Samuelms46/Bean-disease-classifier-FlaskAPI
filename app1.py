@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import torchvision.transforms as T
 from torchvision import models
-from transformers import ViTForImageClassification, ViTConfig
+# Removed transformers import to reduce memory usage on free tier
 import os
 import base64
 from io import BytesIO
@@ -31,7 +31,10 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend connection
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10 MB upload limit
 app.config["UPLOAD_FOLDER"] = Path("static/uploads")
-app.config["UPLOAD_FOLDER"].mkdir(exist_ok=True)
+
+# Ensure upload directory exists
+upload_dir = Path("static/uploads")
+upload_dir.mkdir(parents=True, exist_ok=True)
 
 # ----------------------------------------------------------------------
 # Model loading helpers - Optimized for low memory

@@ -11,5 +11,3 @@ models/vit_model.pt
 # Development files
 .git/
 README.md
-static/uploads/*
-!static/uploads/.gitkeep

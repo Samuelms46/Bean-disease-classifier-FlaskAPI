@@ -8,8 +8,9 @@ env/
 myenv/
 .env
 
-# Uploads
-static/uploads/
+# Uploads - ignore files but keep directory
+static/uploads/*
+!static/uploads/.gitkeep
 
 # IDE
 .vscode/
