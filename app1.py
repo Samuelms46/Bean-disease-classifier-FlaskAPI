@@ -34,69 +34,98 @@ app.config["UPLOAD_FOLDER"] = Path("static/uploads")
 app.config["UPLOAD_FOLDER"].mkdir(exist_ok=True)
 
 # ----------------------------------------------------------------------
-# Model loading helpers
+# Model loading helpers - Optimized for low memory
 # ----------------------------------------------------------------------
-@lru_cache(maxsize=1)
-def load_vit():
+
+# Global variable to store the currently loaded model
+_current_model = None
+_current_model_name = None
+
+def load_model_on_demand(model_name):
+    """Load only one model at a time to save memory"""
+    global _current_model, _current_model_name
+    
+    # If the requested model is already loaded, return it
+    if _current_model is not None and _current_model_name == model_name:
+        return _current_model
+    
+    # Clear previous model from memory
+    if _current_model is not None:
+        del _current_model
+        torch.cuda.empty_cache() if torch.cuda.is_available() else None
+    
+    # Load the requested model
     try:
-        config = ViTConfig(num_labels=3)
-        model = ViTForImageClassification(config)
-        model_path = MODEL_DIR / "vit_model.pt"
-        if model_path.exists():
-            sd = torch.load(model_path, map_location=DEVICE)
-            model.load_state_dict(sd)
-            return model.to(DEVICE).eval()
+        if model_name == "mobilenet_v2":
+            # Use MobileNet as it's the smallest and fastest
+            model = models.mobilenet_v2()
+            model.classifier[1] = nn.Linear(model.classifier[1].in_features, 3)
+            model_path = MODEL_DIR / "mobilenetv2_normalized_weights.pt"
+            
+            if model_path.exists():
+                print(f"Loading {model_name} model...")
+                sd = torch.load(model_path, map_location="cpu")  # Load to CPU first
+                model.load_state_dict(sd, strict=False)
+                model = model.to(DEVICE).eval()
+                
+                _current_model = model
+                _current_model_name = model_name
+                print(f"Successfully loaded {model_name}")
+                return model
+            else:
+                print(f"Model file not found: {model_path}")
+                return None
+        
+        elif model_name == "resnet18":
+            model = models.resnet18()
+            model.fc = nn.Linear(model.fc.in_features, 3)
+            model_path = MODEL_DIR / "resnet_model.pth"
+            
+            if model_path.exists():
+                print(f"Loading {model_name} model...")
+                sd = torch.load(model_path, map_location="cpu")
+                model.load_state_dict(sd)
+                model = model.to(DEVICE).eval()
+                
+                _current_model = model
+                _current_model_name = model_name
+                print(f"Successfully loaded {model_name}")
+                return model
+            else:
+                print(f"Model file not found: {model_path}")
+                return None
+        
         else:
-            print(f"ViT model not found at {model_path}")
+            # For free tier, disable ViT model as it's too large
+            print(f"Model {model_name} disabled on free tier to save memory")
             return None
+            
     except Exception as e:
-        print(f"Error loading ViT model: {e}")
+        print(f"Error loading {model_name}: {e}")
         return None
 
+# Legacy functions for compatibility - now use on-demand loading
 @lru_cache(maxsize=1)
+def load_vit():
+    return None  # Disabled for free tier
+
+@lru_cache(maxsize=1) 
 def load_resnet():
-    try:
-        model = models.resnet18()
-        model.fc = nn.Linear(model.fc.in_features, 3)
-        model_path = MODEL_DIR / "resnet_model.pth"
-        if model_path.exists():
-            sd = torch.load(model_path, map_location=DEVICE)
-            model.load_state_dict(sd)
-            return model.to(DEVICE).eval()
-        else:
-            print(f"ResNet model not found at {model_path}")
-            return None
-    except Exception as e:
-        print(f"Error loading ResNet model: {e}")
-        return None
+    return load_model_on_demand("resnet18")
 
 @lru_cache(maxsize=1)
 def load_mobilenet():
-    try:
-        model = models.mobilenet_v2()
-        model.classifier[1] = nn.Linear(model.classifier[1].in_features, 3)
-        model_path = MODEL_DIR / "mobilenetv2_normalized_weights.pt"
-        if model_path.exists():
-            sd = torch.load(model_path, map_location=DEVICE)
-            model.load_state_dict(sd, strict=False)
-            return model.to(DEVICE).eval()
-        else:
-            print(f"MobileNet model not found at {model_path}")
-            return None
-    except Exception as e:
-        print(f"Error loading MobileNet model: {e}")
-        return None
+    return load_model_on_demand("mobilenet_v2")
 
+# Simplified model registry for free tier - prioritize lightweight models
 MODEL_REGISTRY = {
-    "vit": load_vit,
-    "resnet18": load_resnet,
-    "mobilenet_v2": load_mobilenet
+    "mobilenet_v2": lambda: load_model_on_demand("mobilenet_v2"),
+    "resnet18": lambda: load_model_on_demand("resnet18"),
 }
 
 MODEL_DESCRIPTIONS = {
-    "vit": "Vision Transformer - Advanced attention-based model for image classification",
+    "mobilenet_v2": "MobileNet V2 - Lightweight model optimized for mobile devices (Recommended for free tier)",
     "resnet18": "ResNet-18 - Deep residual network with skip connections",
-    "mobilenet_v2": "MobileNet V2 - Lightweight model optimized for mobile devices"
 }
 
 def get_available_models():
@@ -112,7 +141,7 @@ def get_available_models():
     return available
 
 def predict_image(image, model_names):
-    """Predict image class using specified models"""
+    """Predict image class using specified models - optimized for memory"""
     results = {}
     
     # Preprocess image
@@ -126,9 +155,11 @@ def predict_image(image, model_names):
     
     tensor = transform(image).unsqueeze(0).to(DEVICE)
     
+    # For free tier, only process one model at a time to save memory
     for model_name in model_names:
         if model_name in MODEL_REGISTRY:
             try:
+                print(f"Processing prediction with {model_name}...")
                 model = MODEL_REGISTRY[model_name]()
                 if model is not None:
                     with torch.no_grad():
@@ -144,6 +175,11 @@ def predict_image(image, model_names):
                             "probabilities": probs.cpu().numpy().tolist(),
                             "confidence": float(probs[pred_idx].item())
                         }
+                        print(f"Prediction completed for {model_name}: {pred_class}")
+                else:
+                    results[model_name] = {
+                        "error": "Model not available on free tier"
+                    }
             except Exception as e:
                 print(f"Error predicting with {model_name}: {e}")
                 results[model_name] = {

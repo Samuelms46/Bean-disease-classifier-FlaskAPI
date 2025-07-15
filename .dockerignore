@@ -1,3 +1,15 @@
 # Virtual environments
 myenv/
 __pycache__
+
+# For free tier - exclude large model files to reduce image size
+
+# Uncomment these if you want to exclude large models:
+models/vit_model.pt
+# models/resnet_model.pth
+
+# Development files
+.git/
+README.md
+static/uploads/*
+!static/uploads/.gitkeep
