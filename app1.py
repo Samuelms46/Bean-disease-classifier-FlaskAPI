@@ -232,27 +232,36 @@ def get_models():
 def predict():
     """Predict image class using selected models"""
     try:
+        print("Predict endpoint called")
+        
         # Check if file was uploaded
         if 'file' not in request.files:
+            print("No file in request")
             return jsonify({"error": "No file uploaded"}), 400
         
         file = request.files['file']
         if file.filename == '':
+            print("Empty filename")
             return jsonify({"error": "No file selected"}), 400
         
         # Get selected models
         models_str = request.form.get('models', '')
+        print(f"Models requested: {models_str}")
         if not models_str:
             return jsonify({"error": "No models selected"}), 400
         
         selected_models = [m.strip() for m in models_str.split(',')]
+        print(f"Selected models: {selected_models}")
         
         # Validate file type
         if not file.content_type.startswith('image/'):
+            print(f"Invalid file type: {file.content_type}")
             return jsonify({"error": "Invalid file type. Please upload an image."}), 400
         
         # Make prediction
+        print("Making predictions...")
         predictions = predict_image(file, selected_models)
+        print(f"Predictions result: {predictions}")
         
         if not predictions:
             return jsonify({"error": "No predictions could be made"}), 500
@@ -263,7 +272,10 @@ def predict():
         })
         
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"Error in predict endpoint: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 @app.route('/')
 def index():
