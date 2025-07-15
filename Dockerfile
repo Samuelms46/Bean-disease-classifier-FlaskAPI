@@ -11,7 +11,7 @@ COPY . .
 ENV FLASK_APP=app1.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
-# Expose the port (Render will set the PORT environment variable)
+# Expose the port (Render sets the PORT environment variable)
 EXPOSE $PORT
 
 # Run the app with Gunicorn (minimal configuration for free tier)
