@@ -127,7 +127,7 @@ MODEL_REGISTRY = {
 }
 
 MODEL_DESCRIPTIONS = {
-    "mobilenet_v2": "MobileNet V2 - Lightweight model optimized for mobile devices (Recommended for free tier)",
+    "mobilenet_v2": "MobileNet V2 - Lightweight model optimized for mobile devices",
     "resnet18": "ResNet-18 - Deep residual network with skip connections",
 }
 
@@ -198,13 +198,26 @@ def predict_image(image, model_names):
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
-    available_models = get_available_models()
-    return jsonify({
-        "status": "healthy",
-        "models_loaded": len(available_models),
-        "available_models": available_models,
-        "device": DEVICE
-    })
+    try:
+        print("Health check called - checking available models...")
+        available_models = get_available_models()
+        print(f"Available models: {available_models}")
+        
+        return jsonify({
+            "status": "healthy",
+            "models_loaded": len(available_models),
+            "available_models": available_models,
+            "device": DEVICE
+        })
+    except Exception as e:
+        print(f"Health check error: {e}")
+        return jsonify({
+            "status": "error",
+            "error": str(e),
+            "models_loaded": 0,
+            "available_models": [],
+            "device": DEVICE
+        }), 500
 
 @app.route('/models', methods=['GET'])
 def get_models():

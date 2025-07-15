@@ -498,8 +498,8 @@
     </div>
 
     <script>
-        // Configuration
-        const API_BASE_URL = 'http://localhost:5000';
+        // Configuration - Auto-detect API URL based on environment
+        const API_BASE_URL = window.location.origin;
         
         // DOM elements
         const dropzone = document.getElementById('dropzone');
@@ -541,8 +541,10 @@
         // Check server connection
         async function checkConnection() {
             try {
+                console.log('Attempting to connect to:', `${API_BASE_URL}/health`);
                 const response = await fetch(`${API_BASE_URL}/health`);
                 const data = await response.json();
+                console.log('Health check response:', data);
                 isConnected = response.ok;
                 
                 if (isConnected) {
@@ -552,8 +554,9 @@
                     throw new Error('Server not responding');
                 }
             } catch (err) {
+                console.error('Connection error:', err);
                 isConnected = false;
-                connectionStatus.textContent = '❌ Cannot connect to server. Using demo mode.';
+                connectionStatus.textContent = '❌ Cannot connect to server. Using offline mode.';
                 connectionStatus.className = 'status disconnected';
             }
         }
