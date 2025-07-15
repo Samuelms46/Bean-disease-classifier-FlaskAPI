@@ -383,8 +383,8 @@
     </div>
 
     <script>
-        // Configuration
-        const API_BASE_URL = 'http://localhost:5000';
+        // Configuration - Auto-detect API URL based on environment
+        const API_BASE_URL = window.location.origin;
         
         // DOM elements
         const dropzone = document.getElementById('dropzone');

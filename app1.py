@@ -265,9 +265,15 @@ def predict():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
-    """Main route - serves the original form-based interface"""
+    """Main route - redirect to modern frontend"""
+    from flask import redirect
+    return redirect('/frontend')
+
+@app.route('/simple', methods=['GET', 'POST'])
+def simple_interface():
+    """Simple form-based interface (legacy)"""
     if request.method == 'POST':
         model_key = request.form.get('model')
         files = request.files.getlist('image')
