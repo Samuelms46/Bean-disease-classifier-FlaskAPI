@@ -6,7 +6,11 @@ COPY requirements-minimal.txt .
 
 RUN pip install --no-cache-dir -r requirements-minimal.txt
 
-COPY . .
+# Copy application files and directories explicitly
+COPY app1.py .
+COPY templates/ templates/
+COPY static/ static/
+COPY models/ models/
 
 ENV FLASK_APP=app1.py
 ENV FLASK_RUN_HOST=0.0.0.0

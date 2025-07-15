@@ -1,13 +1,17 @@
 # Virtual environments
 myenv/
-__pycache__
+__pycache__/
+*.pyc
 
-# For free tier - exclude large model files to reduce image size
-
-# Uncomment these if you want to exclude large models:
+# Large model files (comment out to include)
 models/vit_model.pt
-# models/resnet_model.pth
 
 # Development files
 .git/
 README.md
+.gitignore
+
+# Keep these directories
+!templates/
+!static/
+!models/
