@@ -572,7 +572,7 @@
                 modelGrid.innerHTML = '';
                 const modelInfo = data.model_info || {};
                 
-                ['mobilenet_v2', 'vit', 'resnet18'].forEach(modelName => {
+                ['mobilenet_v2', 'ViT', 'resnet18'].forEach(modelName => {
                     const isAvailable = availableModels.includes(modelName);
                     const card = document.createElement('div');
                     card.className = `model-card ${isAvailable ? '' : 'unavailable'}`;
@@ -608,7 +608,7 @@
         function loadStaticModels() {
             modelGrid.innerHTML = '';
             
-            ['mobilenet_v2', 'vit', 'resnet18'].forEach(modelName => {
+            ['mobilenet_v2', 'ViT', 'resnet18'].forEach(modelName => {
                 const card = document.createElement('div');
                 card.className = 'model-card';
                 
@@ -635,7 +635,7 @@
         function getModelDescription(modelName) {
             const descriptions = {
                 'mobilenet_v2': 'A lightweight model for mobile apps',
-                'vit': 'A transformer-based model',
+                'ViT': 'A transformer-based model',
                 'resnet18': 'An ImageNet model for classification'
             };
             return descriptions[modelName] || 'Model description';

@@ -449,7 +449,7 @@
                 modelGrid.innerHTML = '';
                 const modelInfo = data.model_info || {};
                 
-                ['mobilenet_v2', 'vit', 'resnet18'].forEach(modelName => {
+                ['mobilenet_v2', 'ViT', 'resnet18'].forEach(modelName => {
                     const isAvailable = availableModels.includes(modelName);
                     const card = document.createElement('div');
                     card.className = `model-card ${isAvailable ? '' : 'unavailable'}`;
@@ -485,7 +485,7 @@
         function loadStaticModels() {
             modelGrid.innerHTML = '';
             
-            ['mobilenet_v2', 'vit', 'resnet18'].forEach(modelName => {
+            ['mobilenet_v2', 'ViT', 'resnet18'].forEach(modelName => {
                 const card = document.createElement('div');
                 card.className = 'model-card';
                 
