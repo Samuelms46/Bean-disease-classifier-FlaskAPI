@@ -512,6 +512,6 @@ tail -f app.log
 
 ---
 
-**Last Updated**: [Current Date]
+**Last Updated**: 17/07/2025
 **Version**: 1.0.0
 **Compatibility**: Python 3.8+, PyTorch 1.9+, Flask 2.0+
