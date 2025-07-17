@@ -345,9 +345,18 @@ if __name__ == "__main__":
     print("Starting Bean Leaf Classifier Server...")
     print(f"Using device: {DEVICE}")
     print(f"Available models: {get_available_models()}")
-    print("Server will be available at:")
-    print("- Original interface: http://localhost:5000/")
-    print("- New frontend: http://localhost:5000/frontend")
-    print("- API health check: http://localhost:5000/health")
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Read configuration from environment variables
+    debug_mode = os.getenv('FLASK_DEBUG', '0') == '1'
+    env = os.getenv('FLASK_ENV', 'development')
+    port = int(os.getenv('PORT', 5000))
+    
+    print(f"Environment: {env}")
+    print(f"Debug mode: {debug_mode}")
+    print(f"Port: {port}")
+    print("Server will be available at:")
+    print(f"- Main interface: http://localhost:{port}/")
+    print(f"- New frontend: http://localhost:{port}/frontend")
+    print(f"- API health check: http://localhost:{port}/health")
+    
+    app.run(debug=debug_mode, host='0.0.0.0', port=port)

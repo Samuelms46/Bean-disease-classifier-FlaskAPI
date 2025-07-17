@@ -19,7 +19,7 @@ The Bean Disease Classifier is an AI-powered web application that uses deep lear
 
 | Disease | Description |
 |---------|-------------|
-| **Angular Leaf Spot** | Bacterial disease causing angular lesions on leaves |
+| **Angular Leaf Spot** | Fungal disease causing angular lesions on leaves |
 | **Bean Rust** | Fungal disease creating rust-colored pustules |
 | **Healthy** | Normal, disease-free bean leaves |
 
@@ -45,7 +45,7 @@ bean-disease-classifier/
 
 ## 🔧 Prerequisites
 
-- Python 3.8 or higher
+- Python 3.10 or higher
 - PyTorch
 - PIL (Python Imaging Library)
 - Flask and dependencies
@@ -323,11 +323,11 @@ python app1.py # Optimized version
 
 [license]
 
-## 👨‍💻 Author
+## 👨‍💻 Authors
 
 **Samuel Muwanguzi** - [GitHub Profile](https://github.com/Samuelms46)\
 **Kashara Alvin Ssali** [GitHub Profile](https://github.com/Kashara-Alvin-Ssali)\
-**Edwin** [GitHub Profile]()
+**Bill Edwin-Ogwal** [GitHub Profile](https://github.com/thefr3spirit)
 
 
 ## 🙏 Acknowledgments
@@ -409,9 +409,9 @@ python app.py
 
 ### Staging
 ```bash
-# Optimized version, 
+# Optimized version, limted debugging
 export FLASK_ENV=production
-export FLASK_DEBUG=1
+export FLASK_DEBUG=0
 python app1.py
 ```
 
