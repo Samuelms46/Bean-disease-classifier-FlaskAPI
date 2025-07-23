@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir -r requirements-minimal.txt
 COPY app1.py .
 COPY templates/ templates/
 COPY static/ static/
-COPY models/ models/
+# COPY models/ models/
 
 ENV FLASK_APP=app1.py
 ENV FLASK_RUN_HOST=0.0.0.0
