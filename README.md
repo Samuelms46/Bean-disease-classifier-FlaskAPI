@@ -334,7 +334,7 @@ python app1.py # Optimized version
 ## 🙏 Acknowledgments
 
 - Contributors to the pre-trained models
-- Makerere AI lab research community for disease classification datasets
+- Makerere AI Lab research community for disease classification datasets
 
 ---
 
