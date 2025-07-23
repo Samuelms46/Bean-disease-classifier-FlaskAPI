@@ -11,6 +11,7 @@ from torchvision import models
 # Removed transformers import to reduce memory usage on free tier
 import os
 import base64
+import gc
 from io import BytesIO
 
 # ----------------------------------------------------------------------
@@ -19,6 +20,7 @@ from io import BytesIO
 MODEL_DIR = Path("models")
 CLASS_NAMES = ['angular_leaf_spot', 'bean_rust', 'healthy']
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+torch.set_num_threads(1)
 
 transform = T.Compose([
     T.Resize((224, 224)),
@@ -179,6 +181,10 @@ def predict_image(image, model_names):
                             "confidence": float(probs[pred_idx].item())
                         }
                         print(f"Prediction completed for {model_name}: {pred_class}")
+                        
+                        # cleanup
+                        del output, logits, probs
+                        torch.cuda.empty_cache() if torch.cuda.is_available() else None
                 else:
                     results[model_name] = {
                         "error": "Model not available on free tier"
@@ -262,6 +268,8 @@ def predict():
         print("Making predictions...")
         predictions = predict_image(file, selected_models)
         print(f"Predictions result: {predictions}")
+
+        gc.collect()
         
         if not predictions:
             return jsonify({"error": "No predictions could be made"}), 500

@@ -31,6 +31,7 @@ bean-disease-classifier/
 ├── app1.py                         # Optimized version for deployment
 ├── Dockerfile                      # Container configuration
 ├── requirements.txt                # Production dependencies
+├── requirements-minimal.txt        # Minimal production dependencies
 ├── templates/
 │   ├── frontend.html              # Modern web interface
 │   └── index.html                 # Legacy interface
@@ -332,8 +333,6 @@ python app1.py # Optimized version
 
 ## 🙏 Acknowledgments
 
-- PyTorch team for the deep learning framework
-- Flask community for the web framework
 - Contributors to the pre-trained models
 - Makerere AI lab research community for disease classification datasets
 
@@ -409,7 +408,7 @@ python app.py
 
 ### Staging
 ```bash
-# Optimized version, limted debugging
+# Optimized version, limited debugging
 export FLASK_ENV=production
 export FLASK_DEBUG=0
 python app1.py
@@ -512,6 +511,6 @@ tail -f app.log
 
 ---
 
-**Last Updated**: 17/07/2025
-**Version**: 1.0.0
-**Compatibility**: Python 3.8+, PyTorch 1.9+, Flask 2.0+
+**Last Updated**: 23/07/2025
+**Version**: 1.0.1
+**Compatibility**: Python 3.10+, PyTorch 1.9+, Flask 2.0+
