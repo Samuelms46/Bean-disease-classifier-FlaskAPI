@@ -1,4 +1,4 @@
-# Minimal requirements for free tier deployment - OPTIMIZED
+# Minimal requirements for free tier deployment
 Flask==3.1.1
 flask-cors==5.0.0
 Werkzeug==3.0.4
@@ -11,3 +11,5 @@ Pillow==10.4.0
 --index-url https://download.pytorch.org/whl/cpu
 torch==2.4.1+cpu
 torchvision==0.19.1+cpu
+
+numpy==2.3.1
