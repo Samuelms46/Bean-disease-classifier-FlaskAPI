@@ -62,7 +62,6 @@ def load_model_on_demand(model_name):
     # Load the requested model
     try:
         if model_name == "mobilenet_v2":
-            # Use MobileNet as it's the smallest and fastest
             model = models.mobilenet_v2()
             model.classifier[1] = nn.Linear(model.classifier[1].in_features, 3)
             model_path = MODEL_DIR / "mobilenetv2_normalized_weights.pt"
@@ -101,7 +100,7 @@ def load_model_on_demand(model_name):
                 return None
         
         else:
-            # For free tier, disable ViT model as it's too large
+            # For free tier, disabled ViT model as it's too large
             print(f"Model {model_name} disabled on free tier to save memory")
             return None
             
@@ -109,7 +108,7 @@ def load_model_on_demand(model_name):
         print(f"Error loading {model_name}: {e}")
         return None
 
-# Legacy functions for compatibility - now use on-demand loading
+# Legacy functions for compatibility - use on-demand loading
 @lru_cache(maxsize=1)
 def load_vit():
     return None  # Disabled for free tier
@@ -122,7 +121,7 @@ def load_resnet():
 def load_mobilenet():
     return load_model_on_demand("mobilenet_v2")
 
-# Simplified model registry for free tier - prioritize lightweight models
+# Simplified model registry for free tier - prioritizing lightweight models
 MODEL_REGISTRY = {
     "mobilenet_v2": lambda: load_model_on_demand("mobilenet_v2"),
     "resnet18": lambda: load_model_on_demand("resnet18"),

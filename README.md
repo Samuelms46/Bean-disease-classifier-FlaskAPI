@@ -190,13 +190,13 @@ Response:
   "predictions": {
     "mobilenet_v2": {
       "class": "healthy",
-      "probabilities": [0.1, 0.2, 0.7],
-      "confidence": 0.7
+      "probabilities": [0.1, 0.0, 0.9],
+      "confidence": 0.9
     },
     "resnet18": {
       "class": "healthy", 
-      "probabilities": [0.15, 0.25, 0.6],
-      "confidence": 0.6
+      "probabilities": [0.04, 0.16, 0.8],
+      "confidence": 0.8
     }
   },
   "filename": "healty_test.jpg"
@@ -507,7 +507,7 @@ tail -f app.log
 ### Support
 - GitHub Issues for bug reports
 - Discussions for feature requests
-- Community contributions welcome
+- Community contributions are welcome
 
 ---
 

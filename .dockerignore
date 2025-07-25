@@ -3,7 +3,7 @@ myenv/
 __pycache__/
 *.pyc
 
-# Large model files (comment out to include)
+# Large model files
 models/vit_model.pt
 
 # Development files

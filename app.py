@@ -57,7 +57,6 @@ def load_model_on_demand(model_name):
     # Load the requested model
     try:
         if model_name == "mobilenet_v2":
-            # Use MobileNet as it's the smallest and fastest
             model = models.mobilenet_v2()
             model.classifier[1] = nn.Linear(model.classifier[1].in_features, 3)
             model_path = MODEL_DIR / "mobilenetv2_normalized_weights.pt"
@@ -135,7 +134,7 @@ def load_resnet():
 def load_mobilenet():
     return load_model_on_demand("mobilenet_v2")
 
-# Simplified model registry for free tier - prioritize lightweight models
+# Simplified model registry
 MODEL_REGISTRY = {
     "mobilenet_v2": lambda: load_model_on_demand("mobilenet_v2"),
     "resnet18": lambda: load_model_on_demand("resnet18"),
@@ -178,7 +177,7 @@ def predict_image(image, model_names):
     
     tensor = transform(image).unsqueeze(0).to(DEVICE)
     
-    # For free tier, only process one model at a time to save memory
+    # Only processes one model at a time to save memory
     for model_name in model_names:
         if model_name in MODEL_REGISTRY:
             try:
@@ -201,7 +200,7 @@ def predict_image(image, model_names):
                         print(f"Prediction completed for {model_name}: {pred_class}")
                 else:
                     results[model_name] = {
-                        "error": "Model not available on free tier"
+                        "error": "Model not available.."
                     }
             except Exception as e:
                 print(f"Error predicting with {model_name}: {e}")
