@@ -1,8 +1,8 @@
-# 🌱 Bean Disease Classifier Flask API
+# 🌱 Bean Leaf Disease Classifier Flask API
 
 ## Overview
 
-The Bean Disease Classifier is an AI-powered web application that uses deep learning models to classify bean leaf diseases. The application can identify three conditions: **Angular Leaf Spot**, **Bean Rust**, and **Healthy** leaves. It provides both a modern web interface and HTTP API endpoints for image classification using multiple pre-trained models.
+The Bean Leaf Disease Classifier is an AI-powered web application that uses deep learning models to classify bean leaf diseases. The application can identify three conditions: **Angular Leaf Spot**, **Bean Rust**, and **Healthy** leaves. It provides both a modern web interface and HTTP API endpoints for image classification using multiple pre-trained models.
 
 ## 🚀 Features
 

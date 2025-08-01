@@ -81,27 +81,85 @@
         .preview {
             display: none;
             margin-bottom: 16px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            padding: 12px;
+            border-radius: 8px;
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            max-height: 140px;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #f1f5f9;
         }
-        @media (min-width: 640px) {
-            .preview {
-                grid-template-columns: repeat(3, 1fr);
-            }
+        .preview::-webkit-scrollbar {
+            height: 10px;
+        }
+        .preview::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 5px;
+        }
+        .preview::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 5px;
+            border: 2px solid #f1f5f9;
+        }
+        .preview::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .preview-item {
+            position: relative;
+            display: inline-block;
+            width: 100px;
+            margin-right: 12px;
+            vertical-align: top;
+            white-space: normal;
+            flex-shrink: 0;
+        }
+        .preview-item:last-child {
+            margin-right: 12px;
         }
         .preview img {
             width: 100%;
-            height: 128px;
+            height: 80px;
             object-fit: cover;
-            border-radius: 8px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+        .preview img:hover {
+            transform: scale(1.05);
         }
         .preview p {
-            font-size: 14px;
+            font-size: 10px;
             color: #4b5563;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            margin-top: 4px;
+            padding: 0 2px;
+            text-align: center;
+        }
+        .remove-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background-color: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        .remove-btn:hover {
+            background-color: #b91c1c;
         }
         .button-group {
             display: flex;
@@ -298,25 +356,152 @@
             color: #059669;
             margin-left: 8px;
         }
-        .result-card {
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .results-table th {
+            background-color: #f8fafc;
+            color: #374151;
+            font-weight: 600;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #e5e7eb;
+            font-size: 14px;
+        }
+        .results-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: top;
+        }
+        .results-table tr:hover {
             background-color: #f9fafb;
-            border: 1px solid #e5e7eb;
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 24px;
         }
-        .result-card img {
-            width: 128px;
-            height: 128px;
+        .results-table img {
+            width: 80px;
+            height: 80px;
             object-fit: cover;
-            border-radius: 8px;
-            margin-right: 16px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        .result-card h3 {
-            font-size: 16px;
+        .filename {
             font-weight: 600;
             color: #1f2937;
+            font-size: 14px;
+            max-width: 150px;
+            word-break: break-word;
+        }
+        .model-result {
             margin-bottom: 8px;
+            padding: 8px;
+            background-color: #f8fafc;
+            border-radius: 4px;
+            border-left: 3px solid #4b8a3e;
+        }
+        .model-result:last-child {
+            margin-bottom: 0;
+        }
+        .model-name-table {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 13px;
+        }
+        .predicted-class {
+            color: #4b8a3e;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .confidence-table {
+            color: #6b7280;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+        .probabilities-table {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 4px;
+            line-height: 1.3;
+        }
+        .probabilities-toggle {
+            background: none;
+            border: none;
+            color: #4b8a3e;
+            cursor: pointer;
+            font-size: 11px;
+            text-decoration: underline;
+            padding: 0;
+            margin-top: 4px;
+        }
+        .results-table img {
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .results-table img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            position: relative;
+            margin: auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 800px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-image {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        .modal-filename {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 16px;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        .modal-close:hover {
+            color: #f87171;
+        }
+        .modal-instructions {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin-top: 12px;
+            text-align: center;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
         .prediction {
             margin-bottom: 16px;
@@ -415,7 +600,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🤖 Bean Leaf Classifier</h1>
+        <h1>🌱 Bean Leaf Disease Classifier</h1>
         <p class="subtitle">Upload multiple images and classify them using advanced AI models</p>
         
         <div id="connectionStatus" class="status disconnected">
@@ -497,6 +682,16 @@
         </div>
     </div>
 
+    <!-- Image Modal -->
+    <div id="imageModal" class="image-modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <img id="modalImage" class="modal-image" src="" alt="">
+            <div id="modalFilename" class="modal-filename"></div>
+            <div class="modal-instructions">Click anywhere outside the image or Press ESC to close</div>
+        </div>
+    </div>
+
     <script>
         // Configuration - Auto-detect API URL based on environment
         const API_BASE_URL = window.location.origin;
@@ -520,6 +715,10 @@
         const formatSelect = document.getElementById('formatSelect');
         const downloadStatus = document.getElementById('downloadStatus');
         const summaryStats = document.getElementById('summaryStats');
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const modalFilename = document.getElementById('modalFilename');
+        const modalClose = document.querySelector('.modal-close');
         
         let files = [];
         let availableModels = [];
@@ -653,6 +852,19 @@
             fileInput.addEventListener('change', handleFileSelect);
             classifyBtn.addEventListener('click', classifyImages);
             downloadBtn.addEventListener('click', downloadResults);
+            
+            // Modal event listeners
+            modalClose.addEventListener('click', closeImageModal);
+            imageModal.addEventListener('click', (e) => {
+                if (e.target === imageModal) {
+                    closeImageModal();
+                }
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && imageModal.style.display === 'block') {
+                    closeImageModal();
+                }
+            });
         }
 
         // Drag and drop handlers
@@ -686,6 +898,13 @@
             }
             
             files = [...files, ...validFiles];
+            
+            // Hide results when new images are uploaded
+            if (validFiles.length > 0) {
+                results.style.display = 'none';
+                hideError();
+            }
+            
             updatePreview();
             updateClassifyButton();
         }
@@ -693,13 +912,15 @@
         function updatePreview() {
             preview.innerHTML = '';
             if (files.length > 0) {
-                preview.style.display = 'grid';
+                preview.style.display = 'block';
                 files.forEach((file, index) => {
                     const reader = new FileReader();
                     reader.onload = () => {
                         const div = document.createElement('div');
+                        div.className = 'preview-item';
                         div.innerHTML = `
                             <img src="${reader.result}" alt="Preview ${index + 1}">
+                            <button class="remove-btn" onclick="removeFile(${index})" title="Remove image">×</button>
                             <p>${file.name}</p>
                         `;
                         preview.appendChild(div);
@@ -709,6 +930,12 @@
             } else {
                 preview.style.display = 'none';
             }
+        }
+
+        function removeFile(index) {
+            files.splice(index, 1);
+            updatePreview();
+            updateClassifyButton();
         }
 
         function updateClassifyButton() {
@@ -877,14 +1104,34 @@
         function displayResults(allResults) {
             predictions.innerHTML = '';
             
+            // Hide the preview section after prediction
+            preview.style.display = 'none';
+            
+            // Create table structure
+            const table = document.createElement('table');
+            table.className = 'results-table';
+            
+            // Create table header
+            const thead = document.createElement('thead');
+            thead.innerHTML = `
+                <tr>
+                    <th>Image</th>
+                    <th>Filename</th>
+                    <th>Model Predictions</th>
+                </tr>
+            `;
+            table.appendChild(thead);
+            
+            const tbody = document.createElement('tbody');
+            
             allResults.forEach(result => {
                 const file = files[result.fileIndex];
                 const reader = new FileReader();
                 
                 reader.onload = () => {
-                    const resultCard = document.createElement('div');
-                    resultCard.className = 'result-card';
+                    const row = document.createElement('tr');
                     
+                    // Build predictions HTML for all models
                     let predictionsHtml = '';
                     Object.entries(result.predictions).forEach(([model, pred]) => {
                         const maxProb = Math.max(...pred.probabilities);
@@ -895,33 +1142,63 @@
                             `${label}: ${(pred.probabilities[index] * 100).toFixed(1)}%`
                         ).join('<br>');
 
+                        const modelId = `prob_${result.fileIndex}_${model}`;
+                        
                         predictionsHtml += `
-                            <div class="prediction">
-                                <p><span class="model-name">${model.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span> predicted <span class="class">${pred.class}</span></p>
-                                <p class="confidence">Confidence: ${confidence}%</p>
-                                <details>
-                                    <summary>View probabilities</summary>
-                                    <div class="probabilities">${probabilitiesHtml}</div>
-                                </details>
+                            <div class="model-result">
+                                <div class="model-name-table">${model.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
+                                <div class="predicted-class">${pred.class}</div>
+                                <div class="confidence-table">Confidence: ${confidence}%</div>
+                                <button class="probabilities-toggle" onclick="toggleProbabilities('${modelId}')">
+                                    View probabilities
+                                </button>
+                                <div id="${modelId}" class="probabilities-table" style="display: none;">
+                                    ${probabilitiesHtml}
+                                </div>
                             </div>
                         `;
                     });
 
-                    resultCard.innerHTML = `
-                        <img src="${reader.result}" alt="${result.filename}">
-                        <div>
-                            <h3>${result.filename}</h3>
-                            ${predictionsHtml}
-                        </div>
+                    row.innerHTML = `
+                        <td><img src="${reader.result}" alt="${result.filename}" onclick="openImageModal('${reader.result}', '${result.filename}')" title="Click to view full size"></td>
+                        <td><div class="filename">${result.filename}</div></td>
+                        <td>${predictionsHtml}</td>
                     `;
                     
-                    predictions.appendChild(resultCard);
+                    tbody.appendChild(row);
                 };
                 
                 reader.readAsDataURL(file);
             });
             
+            table.appendChild(tbody);
+            predictions.appendChild(table);
             results.style.display = 'block';
+        }
+
+        function toggleProbabilities(id) {
+            const element = document.getElementById(id);
+            const button = element.previousElementSibling;
+            
+            if (element.style.display === 'none') {
+                element.style.display = 'block';
+                button.textContent = 'Hide probabilities';
+            } else {
+                element.style.display = 'none';
+                button.textContent = 'View probabilities';
+            }
+        }
+
+        function openImageModal(imageSrc, filename) {
+            modalImage.src = imageSrc;
+            modalFilename.textContent = filename;
+            imageModal.style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeImageModal() {
+            imageModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Restore scrolling
         }
 
         // Get used models for summary stats
