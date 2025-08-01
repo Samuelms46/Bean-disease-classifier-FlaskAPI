@@ -1,11 +1,13 @@
-FROM python:3.10-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
 COPY requirements-minimal.txt .
 
-RUN pip install --no-cache-dir -r requirements-minimal.txt
-RUN pip install --upgrande pip
+RUN 
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements-minimal.txt
+
 
 # Copy application files and directories explicitly
 COPY app1.py .
