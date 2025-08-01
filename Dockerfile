@@ -1,16 +1,17 @@
-FROM python:3.12-slim
+FROM python:3.10-slim
 
 WORKDIR /app
 
 COPY requirements-minimal.txt .
 
 RUN pip install --no-cache-dir -r requirements-minimal.txt
+RUN pip install --upgrande pip
 
 # Copy application files and directories explicitly
 COPY app1.py .
 COPY templates/ templates/
 COPY static/ static/
-# COPY models/ models/
+COPY models/ models/
 
 ENV FLASK_APP=app1.py
 ENV FLASK_RUN_HOST=0.0.0.0
